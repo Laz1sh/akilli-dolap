@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
     username      VARCHAR(50)   NOT NULL UNIQUE,
     password_hash VARCHAR(255)  NOT NULL,
     created_at    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
-);
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dolaptaki malzemeler — her satir bir kullaniciya ait (user_id)
 CREATE TABLE IF NOT EXISTS inventory (
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS inventory (
     unit        VARCHAR(30)    NOT NULL DEFAULT 'adet',
     created_at  TIMESTAMP      DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Gecmis tarifler — her kullanicinin "yaptim" dedigi tarifler burada birikir
 CREATE TABLE IF NOT EXISTS recipes (
