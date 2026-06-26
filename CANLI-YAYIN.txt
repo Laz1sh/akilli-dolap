@@ -1,0 +1,73 @@
+==========================================================
+  CANLI YAYIN REHBERI — Hocanin tiklayacagi linki olustur
+==========================================================
+
+GitHub PHP calistirmaz. Hocanin tiklayinca acacagi CANLI bir link icin
+projeyi ucretsiz bir PHP+MySQL hostinge yuklemen gerekir.
+Asagida InfinityFree (ucretsiz) ile adim adim anlatiliyor (~15 dk).
+
+----------------------------------------------------------
+1) UCRETSIZ HOSTING HESABI AC
+----------------------------------------------------------
+- https://infinityfree.com adresine gir -> "Sign Up" -> e-posta ile kaydol.
+- "Create Account" -> ucretsiz bir alt alan adi sec
+  (or. akillidolap.infy.uk gibi). Bu, hocaya verecegin LINK olacak.
+
+----------------------------------------------------------
+2) VERITABANI OLUSTUR
+----------------------------------------------------------
+- Panelde "MySQL Databases" bolumune gir.
+- Yeni bir veritabani olustur. Panel sana su 4 bilgiyi verir, NOT AL:
+    * Host (or. sqlXXX.infinityfree.com)
+    * Database name (or. if0_xxxx_akilli)
+    * Username (or. if0_xxxx)
+    * Password (senin belirledigin)
+
+----------------------------------------------------------
+3) db.php DOSYASINI GUNCELLE
+----------------------------------------------------------
+db.php icindeki su 4 satiri, 2. adimdaki bilgilerle degistir:
+    $DB_HOST = 'sqlXXX.infinityfree.com';
+    $DB_NAME = 'if0_xxxx_akilli';
+    $DB_USER = 'if0_xxxx';
+    $DB_PASS = 'senin-sifren';
+
+----------------------------------------------------------
+4) TABLOLARI OLUSTUR (phpMyAdmin)
+----------------------------------------------------------
+- Panelde "phpMyAdmin"e gir -> olusturdugun veritabanini sec.
+- "SQL" sekmesine database.sql DOSYASININ ICINDEKI
+  "CREATE TABLE ..." kisimlarini yapistir ve calistir.
+  (Not: hostingde veritabani zaten acik oldugu icin, dosyanin
+   en ustundeki "CREATE DATABASE" ve "USE" satirlarini atla;
+   sadece iki CREATE TABLE blogunu calistirman yeterli.)
+
+----------------------------------------------------------
+5) DOSYALARI YUKLE (File Manager / FTP)
+----------------------------------------------------------
+- Panelde "Online File Manager"a gir -> "htdocs" klasorunu ac.
+- Tum proje dosyalarini (index.php, login.php, db.php, ...) htdocs icine yukle.
+  (database.sql, README.md, CANLI-YAYIN.txt yuklemene gerek yok.)
+
+----------------------------------------------------------
+6) GEMINI ANAHTARINI GIR
+----------------------------------------------------------
+- ai_recipe.php icindeki YOUR_GEMINI_API_KEY yerine kendi anahtarini yaz.
+  (Anahtari al: https://aistudio.google.com/apikey)
+- Bu degisikligi SADECE hostingdeki dosyada yap; GitHub'a anahtari koyma.
+- Not: Bazi ucretsiz hostingler dis API cagrisini kisitlayabilir.
+  Anahtar calismazsa site yine acilir ama "DEMO MODU" tarifi gosterir.
+
+----------------------------------------------------------
+7) TEST ET ve LINKI GONDER
+----------------------------------------------------------
+- Tarayicida ac: https://senin-alanadin.infy.uk/login.php
+- Kayit ol -> giris yap -> malzeme ekle -> "Tarif Oner" -> "Yaptim".
+- Calisiyorsa bu linki hocaya gonder.
+- GitHub README'sine de linki ekle:
+  "Canli Demo: https://senin-alanadin.infy.uk/login.php"
+
+==========================================================
+OZET: GitHub = kod (inceleme).  Hosting = canli site (link).
+Ikisini birden ver: hoca hem kodu gorur hem siteyi kullanir.
+==========================================================

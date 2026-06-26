@@ -1,0 +1,17 @@
+# Yerel ayar / gizli bilgiler
+config.local.php
+*.env
+
+# Bagimliliklar
+/vendor/
+node_modules/
+
+# Sistem
+.DS_Store
+Thumbs.db
+*.log
+
+# Editor / arac ayarlari
+.claude/
+.vscode/
+.idea/

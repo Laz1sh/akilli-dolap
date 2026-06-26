@@ -1,0 +1,198 @@
+<?php
+/* index.php — Akilli Dolap & AI Sef arayuzu (giris gerektirir) */
+require __DIR__ . '/auth.php';
+require_login();
+$username = current_username();
+?>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akilli Dolap &amp; AI Sef</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800">
+
+    <header class="bg-emerald-600 text-white py-5 shadow">
+        <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold">Akilli Dolap &amp; AI Sef</h1>
+                <p class="text-emerald-100 text-sm">Dolabindaki malzemelerle ne pisirebilirsin?</p>
+            </div>
+            <div class="text-right text-sm">
+                <span class="block"><?= htmlspecialchars($username) ?></span>
+                <a href="logout.php" class="text-emerald-100 hover:text-white underline">Cikis yap</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- KOLON 1: Dolap (envanter) -->
+        <section class="bg-white rounded-xl shadow p-5">
+            <h2 class="text-lg font-semibold mb-4">Dolabim</h2>
+
+            <form id="addForm" class="space-y-2 mb-4">
+                <input type="text" id="name" placeholder="Malzeme (or. Domates)" required
+                       class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none">
+                <div class="flex gap-2">
+                    <input type="number" id="quantity" placeholder="Miktar" step="0.1" min="0" required
+                           class="w-1/2 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none">
+                    <input type="text" id="unit" placeholder="Birim" value="adet"
+                           class="w-1/2 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none">
+                </div>
+                <button type="submit"
+                        class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg py-2 text-sm font-medium transition">
+                    + Dolaba Ekle
+                </button>
+            </form>
+
+            <ul id="inventoryList" class="space-y-2 text-sm"></ul>
+        </section>
+
+        <!-- KOLON 2: AI Sef -->
+        <section class="bg-white rounded-xl shadow p-5">
+            <h2 class="text-lg font-semibold mb-4">AI Sef</h2>
+            <p class="text-sm text-slate-500 mb-4">
+                Dolabindaki malzemelere gore sana bir tarif onersin.
+            </p>
+            <button id="generateBtn"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg py-3 font-medium transition flex items-center justify-center gap-2">
+                Tarif Oner
+            </button>
+
+            <div id="spinner" class="hidden mt-6 flex flex-col items-center text-indigo-600">
+                <svg class="animate-spin h-8 w-8" viewBox="0 0 24 24" fill="none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+                <span class="text-sm mt-2">Sef dusunuyor...</span>
+            </div>
+        </section>
+
+        <!-- KOLON 3: Tarif sonucu -->
+        <section class="bg-white rounded-xl shadow p-5">
+            <h2 class="text-lg font-semibold mb-4">Tarif</h2>
+            <div id="recipeArea" class="text-sm text-slate-500">
+                Henuz bir tarif olusturulmadi.
+            </div>
+        </section>
+    </main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let currentRecipe = null;
+
+async function loadInventory() {
+    const res  = await fetch('manage_inventory.php?action=list');
+    const data = await res.json();
+    const list = $('inventoryList');
+    list.innerHTML = '';
+
+    if (!data.success || data.items.length === 0) {
+        list.innerHTML = '<li class="text-slate-400">Dolap bos.</li>';
+        return;
+    }
+    data.items.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'flex justify-between items-center border rounded-lg px-3 py-2';
+        li.innerHTML = `
+            <span><strong>${item.name}</strong> — ${item.quantity} ${item.unit}</span>
+            <button data-id="${item.id}" class="del text-red-500 hover:text-red-700 text-xs">Sil</button>`;
+        list.appendChild(li);
+    });
+
+    document.querySelectorAll('.del').forEach(btn => {
+        btn.addEventListener('click', () => deleteItem(btn.dataset.id));
+    });
+}
+
+$('addForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const body = new URLSearchParams({
+        action:   'add',
+        name:     $('name').value,
+        quantity: $('quantity').value,
+        unit:     $('unit').value || 'adet',
+    });
+    const res  = await fetch('manage_inventory.php', { method: 'POST', body });
+    const data = await res.json();
+    if (data.success) {
+        $('name').value = '';
+        $('quantity').value = '';
+        $('unit').value = 'adet';
+        loadInventory();
+    } else {
+        alert(data.error || 'Eklenemedi.');
+    }
+});
+
+async function deleteItem(id) {
+    const body = new URLSearchParams({ action: 'delete', id });
+    await fetch('manage_inventory.php', { method: 'POST', body });
+    loadInventory();
+}
+
+$('generateBtn').addEventListener('click', async () => {
+    $('spinner').classList.remove('hidden');
+    $('recipeArea').innerHTML = '';
+    try {
+        const res  = await fetch('ai_recipe.php');
+        const data = await res.json();
+        if (!data.success) {
+            $('recipeArea').innerHTML = `<p class="text-red-500">${data.error}</p>`;
+            return;
+        }
+        currentRecipe = data.recipe;
+        renderRecipe(data.recipe, data.demo);
+    } catch (err) {
+        $('recipeArea').innerHTML = `<p class="text-red-500">Baglanti hatasi: ${err}</p>`;
+    } finally {
+        $('spinner').classList.add('hidden');
+    }
+});
+
+function renderRecipe(r, demo) {
+    const ing = r.ingredients.map(i =>
+        `<li>${i.name} — ${i.quantity} ${i.unit || ''}</li>`).join('');
+    const steps = r.steps.map(s => `<li>${s}</li>`).join('');
+
+    $('recipeArea').innerHTML = `
+        ${demo ? '<p class="text-xs bg-amber-100 text-amber-700 rounded px-2 py-1 mb-2">DEMO MODU</p>' : ''}
+        <h3 class="text-base font-bold text-slate-800">${r.title}</h3>
+        <p class="text-slate-500 mb-3">${r.description || ''}</p>
+        <p class="font-semibold">Malzemeler:</p>
+        <ul class="list-disc list-inside mb-3">${ing}</ul>
+        <p class="font-semibold">Yapilisi:</p>
+        <ol class="list-decimal list-inside mb-4 space-y-1">${steps}</ol>
+        <button id="madeBtn"
+                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg py-2 font-medium transition">
+            Bu Tarifi Yaptim!
+        </button>`;
+
+    $('madeBtn').addEventListener('click', consumeRecipe);
+}
+
+async function consumeRecipe() {
+    if (!currentRecipe) return;
+    const res = await fetch('consume.php', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ ingredients: currentRecipe.ingredients }),
+    });
+    const data = await res.json();
+    if (data.success) {
+        $('recipeArea').innerHTML =
+            '<p class="text-emerald-600 font-medium">Afiyet olsun! Malzemeler dolaptan dusuldu.</p>';
+        currentRecipe = null;
+        loadInventory();
+    } else {
+        alert(data.error || 'Islem basarisiz.');
+    }
+}
+
+loadInventory();
+</script>
+</body>
+</html>
