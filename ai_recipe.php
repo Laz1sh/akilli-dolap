@@ -61,9 +61,11 @@ $mealNote = ($meal !== '' && $meal !== 'farketmez')
 // Kullanici belirli bir yemek istedi mi? (or. baklava) -> gorevi ona gore belirle
 $wish = isset($body['wish']) ? trim((string) $body['wish']) : '';
 if ($wish !== '') {
-    $taskBlock = "Gorevin: Kullanici OZELLIKLE \"$wish\" yapmak istiyor. SADECE bu yemegin tarifini ver; baska bir yemek ONERME, dolapta malzeme olsun olmasin bu yemegi yap.\n"
+    $taskBlock = "Gorevin: Kullanici \"$wish\" yapmak istiyor.\n"
+        . "ONCE KONTROL ET: \"$wish\" gercek bir yemek/yiyecek mi? Anlamsiz harf dizisi (orn. hgjghj, asdf) veya yemek olmayan bir seyse, tarif UYDURMA. Bu durumda SADECE su JSON'u dondur: {\"error\": \"Boyle bir yemek bulunamadi. Lutfen gercek bir yemek adi yazin.\"}\n"
+        . "Gercek bir yemekse: SADECE bu yemegin tarifini ver, baska yemek ONERME.\n"
         . "- \"ingredients\": \"$wish\" icin gereken ve DOLAPTA OLAN malzemeler.\n"
-        . "- \"missing\": \"$wish\" icin gereken ama dolapta OLMAYAN malzemeler (un, pirinc vb. neyse hepsini yaz).";
+        . "- \"missing\": \"$wish\" icin gereken ama dolapta OLMAYAN malzemeler.";
 } else {
     $taskBlock = "Gorevin: Bu malzemelere gore pratik bir yemek tarifi oner.\n"
         . "- Oncelik: mumkunse SADECE dolaptaki malzemelerle (ve tuz/su/yag gibi temel seylerle) yapilabilen bir tarif sec.\n"
@@ -155,6 +157,12 @@ if ($response === false || $httpCode !== 200) {
 $data = json_decode($response, true);
 $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
 $recipe = json_decode($text, true);
+
+// AI gecersiz/anlamsiz yemek icin {"error": ...} dondurduyse onu goster
+if (is_array($recipe) && isset($recipe['error'])) {
+    echo json_encode(['success' => false, 'error' => $recipe['error']]);
+    exit;
+}
 
 if (!$recipe || !isset($recipe['title'])) {
     echo json_encode(['success' => false, 'error' => 'Tarif cozumlenemedi.', 'raw' => $text]);
