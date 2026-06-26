@@ -1,5 +1,7 @@
 # Akilli Dolap & AI Sef
 
+**Canli Demo:** https://akillidolap.infinityfreeapp.com/login.php
+
 Cok kullanicili bir web uygulamasi: her kullanici **kayit olup giris yapar**, kendi dolabini yonetir ve dolabindaki malzemelere gore **yapay zeka (Google Gemini)** ile yemek tarifi alir. "Bu tarifi yaptim" dediginde kullanilan malzemeler dolabindan otomatik dusulur.
 
 ## Kullanilan Teknolojiler
