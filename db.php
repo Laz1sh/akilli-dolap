@@ -1,10 +1,7 @@
 <?php
 /**
  * db.php — Veritabani baglantisi (PDO) + oturum (session) baslatma
- * --------------------------------------------------
- * Asagidaki 4 degeri kendi ortamina gore duzenle.
- * XAMPP (yerel): host=localhost, kullanici=root, sifre="" (bos)
- * Ucretsiz hostingde (InfinityFree vb.) panelin verdigi degerleri yaz.
+ * Baglanti bilgilerini kendi ortaminiza gore duzenleyin.
  */
 
 if (session_status() === PHP_SESSION_NONE) {
