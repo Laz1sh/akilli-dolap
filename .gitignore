@@ -13,6 +13,5 @@ Thumbs.db
 *.log
 
 # Editor / arac ayarlari
-.claude/
 .vscode/
 .idea/
