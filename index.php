@@ -83,7 +83,7 @@ $username = current_username();
                 <option value="atistirmalik">Atistirmalik</option>
                 <option value="tatli">Tatli</option>
             </select>
-            <label class="block text-sm text-slate-600 mb-1">Canin ozel bir sey mi cekiyor? (istege bagli)</label>
+            <label class="block text-sm text-slate-600 mb-1">Canin ozel bir sey mi cekiyor? (yazarsan ustteki ogun secimi pasiflesir)</label>
             <input type="text" id="wish" placeholder="or. baklava, mercimek corbasi..."
                    class="w-full border rounded-lg px-3 py-2 text-sm mb-3 focus:ring-2 focus:ring-indigo-400 outline-none">
             <button id="generateBtn"
@@ -199,6 +199,15 @@ async function generateRecipe() {
 }
 
 $('generateBtn').addEventListener('click', generateRecipe);
+
+// Ogun secimi ile "ozel istek" celismesin: bir yemek yazilinca ogun secimi pasiflesir
+$('wish').addEventListener('input', () => {
+    const hasWish = $('wish').value.trim() !== '';
+    $('mealType').disabled = hasWish;
+    if (hasWish) { $('mealType').value = 'farketmez'; }
+    $('mealType').classList.toggle('opacity-50', hasWish);
+    $('mealType').classList.toggle('cursor-not-allowed', hasWish);
+});
 
 function renderRecipe(r, demo, readOnly) {
     const ing = r.ingredients.map(i =>
