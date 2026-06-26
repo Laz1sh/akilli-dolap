@@ -39,8 +39,22 @@ $username = current_username();
                 <div class="flex gap-2">
                     <input type="number" id="quantity" placeholder="Miktar" step="0.1" min="0" required
                            class="w-1/2 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none">
-                    <input type="text" id="unit" placeholder="Birim" value="adet"
-                           class="w-1/2 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none">
+                    <select id="unit"
+                            class="w-1/2 border rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-emerald-400 outline-none">
+                        <option value="adet">adet</option>
+                        <option value="gram">gram</option>
+                        <option value="kg">kg</option>
+                        <option value="litre">litre</option>
+                        <option value="ml">ml</option>
+                        <option value="paket">paket</option>
+                        <option value="dilim">dilim</option>
+                        <option value="demet">demet</option>
+                        <option value="dis">dis</option>
+                        <option value="su bardagi">su bardagi</option>
+                        <option value="yemek kasigi">yemek kasigi</option>
+                        <option value="cay kasigi">cay kasigi</option>
+                        <option value="tutam">tutam</option>
+                    </select>
                 </div>
                 <button type="submit"
                         class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg py-2 text-sm font-medium transition">
