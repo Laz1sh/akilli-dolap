@@ -58,6 +58,12 @@ $mealNote = ($meal !== '' && $meal !== 'farketmez')
     ? "Kullanici su OGUN icin tarif istiyor: $meal. Tarifi bu ogune uygun sec (orn. kahvalti icin kahvaltilik, cay saati icin ikramlik/hamur isi/tatli gibi)."
     : '';
 
+// Kullanici belirli bir yemek istedi mi? (or. baklava)
+$wish = isset($body['wish']) ? trim((string) $body['wish']) : '';
+$wishNote = $wish !== ''
+    ? "ONEMLI: Kullanici OZELLIKLE su yemegi yapmak istiyor: \"$wish\". Baska yemek onerme, tam olarak bunun tarifini ver. Dolaptaki kullanilabilecek malzemeleri \"ingredients\"a, dolapta OLMAYIP gereken malzemeleri \"missing\"e koy. Dolaptakiler yetmese bile standart tarifini ver ve eksikleri missing'de goster."
+    : '';
+
 // 2) Anahtar yoksa DEMO tarif dondur
 if ($GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY' || $GEMINI_API_KEY === '') {
     echo json_encode([
@@ -87,6 +93,7 @@ $prompt = <<<PROMPT
 Sen bir Turk ascisisin. Kullanicinin dolabinda su malzemeler var: $ingredientList
 $excludeNote
 $mealNote
+$wishNote
 
 Gorevin: Bu malzemelere gore pratik bir yemek tarifi oner.
 - Oncelik: mumkunse SADECE dolaptaki malzemelerle (ve tuz/su/yag gibi temel seylerle) yapilabilen bir tarif sec.

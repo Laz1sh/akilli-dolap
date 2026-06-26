@@ -83,6 +83,9 @@ $username = current_username();
                 <option value="atistirmalik">Atistirmalik</option>
                 <option value="tatli">Tatli</option>
             </select>
+            <label class="block text-sm text-slate-600 mb-1">Canin ozel bir sey mi cekiyor? (istege bagli)</label>
+            <input type="text" id="wish" placeholder="or. baklava, mercimek corbasi..."
+                   class="w-full border rounded-lg px-3 py-2 text-sm mb-3 focus:ring-2 focus:ring-indigo-400 outline-none">
             <button id="generateBtn"
                     class="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg py-3 font-medium transition flex items-center justify-center gap-2">
                 Tarif Oner
@@ -178,7 +181,7 @@ async function generateRecipe() {
         const res  = await fetch('ai_recipe.php', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ exclude: suggestedTitles, meal: $('mealType').value }),
+            body:    JSON.stringify({ exclude: suggestedTitles, meal: $('mealType').value, wish: $('wish').value }),
         });
         const data = await res.json();
         if (!data.success) {
