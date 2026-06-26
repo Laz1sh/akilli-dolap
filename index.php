@@ -171,8 +171,9 @@ async function deleteItem(id) {
     loadInventory();
 }
 
-// Onerilen tarif basliklari — "Baska Tarif Oner"de bunlari haric tutariz
-let suggestedTitles = [];
+// Onerilen tarif basliklari — "Baska Tarif Oner"de bunlari haric tutariz.
+// localStorage'da saklanir, sayfa yenilense bile hatirlanir.
+let suggestedTitles = JSON.parse(localStorage.getItem('suggestedTitles') || '[]');
 
 async function generateRecipe() {
     $('spinner').classList.remove('hidden');
@@ -189,7 +190,11 @@ async function generateRecipe() {
             return;
         }
         currentRecipe = data.recipe;
-        if (data.recipe && data.recipe.title) suggestedTitles.push(data.recipe.title);
+        if (data.recipe && data.recipe.title) {
+            suggestedTitles.push(data.recipe.title);
+            if (suggestedTitles.length > 30) suggestedTitles = suggestedTitles.slice(-30);
+            localStorage.setItem('suggestedTitles', JSON.stringify(suggestedTitles));
+        }
         renderRecipe(data.recipe, data.demo);
     } catch (err) {
         $('recipeArea').innerHTML = `<p class="text-red-500">Baglanti hatasi: ${err}</p>`;

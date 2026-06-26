@@ -49,7 +49,7 @@ $exclude = (isset($body['exclude']) && is_array($body['exclude'])) ? $body['excl
 $excludeNote = '';
 if ($exclude) {
     $list = implode(', ', array_map(fn($t) => (string) $t, $exclude));
-    $excludeNote = "Daha once sunlari onerdin; BUNLARDAN TAMAMEN FARKLI, baska bir yemek oner (ayni yemegi tekrar onerme): $list";
+    $excludeNote = "Su tarifleri/basliklari daha once onerdin; AYNILARINI tekrar etme. Farkli bir tarif yap; gerekirse ayni yemegin FARKLI bir varyasyonunu (degisik malzeme/tarz, farkli baslik) yap: $list";
 }
 
 // Ogun turu (kahvalti, aksam yemegi, cay saati ikrami...)
@@ -63,7 +63,7 @@ $wish = isset($body['wish']) ? trim((string) $body['wish']) : '';
 if ($wish !== '') {
     $taskBlock = "Gorevin: Kullanici \"$wish\" yapmak istiyor.\n"
         . "ONCE KONTROL ET: \"$wish\" gercek bir yemek/yiyecek mi? Anlamsiz harf dizisi (orn. hgjghj, asdf) veya yemek olmayan bir seyse, tarif UYDURMA. Bu durumda SADECE su JSON'u dondur: {\"error\": \"Boyle bir yemek bulunamadi. Lutfen gercek bir yemek adi yazin.\"}\n"
-        . "Gercek bir yemekse: SADECE bu yemegin tarifini ver, baska yemek ONERME.\n"
+        . "Gercek bir yemekse: bu yemegin tarifini ver (baska TUR yemek onerme). Ama her cagrida FARKLI bir varyasyon yap (degisik malzeme/tarz) ve basligi ona gore degistir, orn. 'Tereyagli Pilav', 'Sebzeli Pilav', 'Domatesli Pilav'.\n"
         . "- \"ingredients\": \"$wish\" icin gereken ve DOLAPTA OLAN malzemeler.\n"
         . "- \"missing\": \"$wish\" icin gereken ama dolapta OLMAYAN malzemeler.";
 } else {
@@ -118,7 +118,7 @@ PROMPT;
 
 $payload = [
     'contents' => [[ 'parts' => [[ 'text' => $prompt ]] ]],
-    'generationConfig' => [ 'response_mime_type' => 'application/json' ],
+    'generationConfig' => [ 'response_mime_type' => 'application/json', 'temperature' => 1.0 ],
 ];
 
 $url = "https://generativelanguage.googleapis.com/v1beta/models/"
