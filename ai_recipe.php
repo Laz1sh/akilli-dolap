@@ -62,19 +62,22 @@ if (GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY' || GEMINI_API_KEY === '') {
 
 // 3) Gemini'ye gonderilecek istem (prompt)
 $prompt = <<<PROMPT
-Sen bir Turk ascisisin. Asagidaki dolap malzemeleriyle yapilabilecek TEK bir yemek tarifi oner.
-Sadece bu malzemeleri (ve tuz/su/yag gibi temel mutfak malzemelerini) kullan.
+Sen bir Turk ascisisin. Kullanicinin dolabinda su malzemeler var: $ingredientList
 
-Dolaptaki malzemeler: $ingredientList
+Gorevin: Bu malzemelere gore pratik bir yemek tarifi oner.
+- Oncelik: mumkunse SADECE dolaptaki malzemelerle (ve tuz/su/yag gibi temel seylerle) yapilabilen bir tarif sec.
+- Eger cok daha guzel/tam bir tarif icin sadece 1-2 ek malzeme gerekiyorsa, o tarifi onerebilirsin; eksik olanlari "missing" listesinde belirt ve aciklamada "su malzemeleri de alirsan bunu yapabilirsin" tarzinda kisaca soyle.
+- "ingredients": SADECE dolaptan kullanilan malzemeler ve kullanilan miktar.
+- "missing": dolapta OLMAYAN ama tarif icin gereken malzemeler. Hicbiri yoksa bos liste [].
 
 Cevabi SADECE su JSON formatinda ver, baska hicbir metin ekleme:
 {
   "title": "Yemek adi",
-  "description": "Kisa aciklama",
+  "description": "Kisa aciklama (eksik malzeme varsa burada belirt)",
   "ingredients": [{"name": "Malzeme adi", "quantity": sayi, "unit": "birim"}],
+  "missing": [{"name": "Eksik malzeme", "quantity": sayi, "unit": "birim"}],
   "steps": ["1. adim", "2. adim"]
 }
-"ingredients" listesinde SADECE dolaptan kullanilan malzemeler ve kullanilan miktar olsun.
 PROMPT;
 
 $payload = [
@@ -99,9 +102,17 @@ $curlErr  = curl_error($ch);
 curl_close($ch);
 
 if ($response === false || $httpCode !== 200) {
+    // Gemini'nin dondurdugu gercek hata mesajini ayikla (tani icin)
+    $apiErr = '';
+    $errData = json_decode((string) $response, true);
+    if (isset($errData['error']['message'])) {
+        $apiErr = $errData['error']['message'];
+    } else {
+        $apiErr = substr((string) $response, 0, 300);
+    }
     echo json_encode([
         'success' => false,
-        'error'   => 'Gemini API hatasi (HTTP ' . $httpCode . '). ' . $curlErr,
+        'error'   => 'Gemini API hatasi (HTTP ' . $httpCode . '). ' . $curlErr . ' | ' . $apiErr,
     ]);
     exit;
 }

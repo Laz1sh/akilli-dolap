@@ -172,12 +172,22 @@ function renderRecipe(r, demo) {
         `<li>${i.name} — ${i.quantity} ${i.unit || ''}</li>`).join('');
     const steps = r.steps.map(s => `<li>${s}</li>`).join('');
 
+    // Dolapta olmayan, alinmasi gereken malzemeler (varsa)
+    const missingBlock = (r.missing && r.missing.length)
+        ? `<p class="font-semibold text-amber-600 mt-3">Eksik (almaniz gerekenler):</p>
+           <ul class="list-disc list-inside mb-3 text-amber-700">` +
+          r.missing.map(i =>
+            `<li>${i.name}${i.quantity ? ' — ' + i.quantity + ' ' + (i.unit || '') : ''}</li>`).join('') +
+          `</ul>`
+        : '';
+
     $('recipeArea').innerHTML = `
         ${demo ? '<p class="text-xs bg-amber-100 text-amber-700 rounded px-2 py-1 mb-2">DEMO MODU</p>' : ''}
         <h3 class="text-base font-bold text-slate-800">${r.title}</h3>
         <p class="text-slate-500 mb-3">${r.description || ''}</p>
-        <p class="font-semibold">Malzemeler:</p>
-        <ul class="list-disc list-inside mb-3">${ing}</ul>
+        <p class="font-semibold">Malzemeler (dolabinda var):</p>
+        <ul class="list-disc list-inside mb-1">${ing}</ul>
+        ${missingBlock}
         <p class="font-semibold">Yapilisi:</p>
         <ol class="list-decimal list-inside mb-4 space-y-1">${steps}</ol>
         <button id="madeBtn"
