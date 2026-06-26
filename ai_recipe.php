@@ -58,11 +58,19 @@ $mealNote = ($meal !== '' && $meal !== 'farketmez')
     ? "Kullanici su OGUN icin tarif istiyor: $meal. Tarifi bu ogune uygun sec (orn. kahvalti icin kahvaltilik, cay saati icin ikramlik/hamur isi/tatli gibi)."
     : '';
 
-// Kullanici belirli bir yemek istedi mi? (or. baklava)
+// Kullanici belirli bir yemek istedi mi? (or. baklava) -> gorevi ona gore belirle
 $wish = isset($body['wish']) ? trim((string) $body['wish']) : '';
-$wishNote = $wish !== ''
-    ? "ONEMLI: Kullanici OZELLIKLE su yemegi yapmak istiyor: \"$wish\". Baska yemek onerme, tam olarak bunun tarifini ver. Dolaptaki kullanilabilecek malzemeleri \"ingredients\"a, dolapta OLMAYIP gereken malzemeleri \"missing\"e koy. Dolaptakiler yetmese bile standart tarifini ver ve eksikleri missing'de goster."
-    : '';
+if ($wish !== '') {
+    $taskBlock = "Gorevin: Kullanici OZELLIKLE \"$wish\" yapmak istiyor. SADECE bu yemegin tarifini ver; baska bir yemek ONERME, dolapta malzeme olsun olmasin bu yemegi yap.\n"
+        . "- \"ingredients\": \"$wish\" icin gereken ve DOLAPTA OLAN malzemeler.\n"
+        . "- \"missing\": \"$wish\" icin gereken ama dolapta OLMAYAN malzemeler (un, pirinc vb. neyse hepsini yaz).";
+} else {
+    $taskBlock = "Gorevin: Bu malzemelere gore pratik bir yemek tarifi oner.\n"
+        . "- Oncelik: mumkunse SADECE dolaptaki malzemelerle (ve tuz/su/yag gibi temel seylerle) yapilabilen bir tarif sec.\n"
+        . "- Cok daha guzel/tam bir tarif icin 1-2 ek malzeme gerekiyorsa onerebilirsin; eksikleri 'missing'de belirt.\n"
+        . "- \"ingredients\": SADECE dolaptan kullanilan malzemeler ve miktar.\n"
+        . "- \"missing\": dolapta OLMAYAN ama gereken malzemeler. Hicbiri yoksa bos liste [].";
+}
 
 // 2) Anahtar yoksa DEMO tarif dondur
 if ($GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY' || $GEMINI_API_KEY === '') {
@@ -93,13 +101,8 @@ $prompt = <<<PROMPT
 Sen bir Turk ascisisin. Kullanicinin dolabinda su malzemeler var: $ingredientList
 $excludeNote
 $mealNote
-$wishNote
 
-Gorevin: Bu malzemelere gore pratik bir yemek tarifi oner.
-- Oncelik: mumkunse SADECE dolaptaki malzemelerle (ve tuz/su/yag gibi temel seylerle) yapilabilen bir tarif sec.
-- Eger cok daha guzel/tam bir tarif icin sadece 1-2 ek malzeme gerekiyorsa, o tarifi onerebilirsin; eksik olanlari "missing" listesinde belirt ve aciklamada "su malzemeleri de alirsan bunu yapabilirsin" tarzinda kisaca soyle.
-- "ingredients": SADECE dolaptan kullanilan malzemeler ve kullanilan miktar.
-- "missing": dolapta OLMAYAN ama tarif icin gereken malzemeler. Hicbiri yoksa bos liste [].
+$taskBlock
 
 Cevabi SADECE su JSON formatinda ver, baska hicbir metin ekleme:
 {
