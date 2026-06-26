@@ -282,15 +282,27 @@ async function loadHistory() {
         const date = (row.created_at || '').replace('T', ' ').slice(0, 16);
         li.innerHTML =
             `<span><strong>${row.title}</strong> <span class="text-slate-400 text-xs">${date}</span></span>
-             <button class="view text-indigo-600 hover:text-indigo-800 text-xs">Goster</button>`;
+             <span class="shrink-0">
+                <button class="view text-indigo-600 hover:text-indigo-800 text-xs mr-3">Goster</button>
+                <button class="del-recipe text-red-500 hover:text-red-700 text-xs">Sil</button>
+             </span>`;
         li.querySelector('.view').addEventListener('click', () => {
             try {
                 renderRecipe(JSON.parse(row.data), false, true);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (e) { /* bozuk kayit, atla */ }
         });
+        li.querySelector('.del-recipe').addEventListener('click', () => deleteHistory(row.id));
         list.appendChild(li);
     });
+}
+
+// Gecmisten tarif sil
+async function deleteHistory(id) {
+    if (!confirm('Bu tarifi gecmisten silmek istiyor musun?')) return;
+    const body = new URLSearchParams({ action: 'delete', id });
+    await fetch('recipes.php', { method: 'POST', body });
+    loadHistory();
 }
 
 loadInventory();
