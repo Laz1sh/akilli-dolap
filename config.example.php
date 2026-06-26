@@ -1,16 +1,12 @@
 <?php
 /**
- * config.example.php — Ornek ayar dosyasi
- * --------------------------------------------------
- * Bu dosyayi kopyalayip "config.php" olarak kaydet ve kendi degerlerini gir.
- * config.php GitHub'a YUKLENMEZ (.gitignore'da). Anahtarini guvende tutar;
- * ai_recipe.php'yi tekrar yukleseniz bile config.php silinmedigi icin anahtar kalir.
- *
- * Gemini API anahtari al: https://aistudio.google.com/apikey  (AIza... ile baslar)
+ * config.example.php
+ * Bu dosyayi "config.php" olarak kopyalayip kendi degerlerinizi girin.
+ * config.php surum kontrolune dahil edilmez (.gitignore).
+ * Gemini API anahtari: https://aistudio.google.com/apikey
  */
 
 return [
-    'gemini_api_key' => 'AIza_BURAYA_KENDI_ANAHTARIN',
-    // Kota sorunu olursa modeli degistir: 'gemini-2.0-flash' veya 'gemini-2.5-flash'
-    'gemini_model'   => 'gemini-2.0-flash',
+    'gemini_api_key' => 'YOUR_GEMINI_API_KEY',
+    'gemini_model'   => 'gemini-2.5-flash',
 ];

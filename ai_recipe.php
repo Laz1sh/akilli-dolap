@@ -18,8 +18,7 @@ require __DIR__ . '/auth.php';
 require_login_api();
 header('Content-Type: application/json; charset=utf-8');
 
-// Ayarlar: config.php VARSA oradan okunur (anahtar orada durur, GitHub'a gitmez,
-// dosyalari tekrar yukleseniz bile silinmez). Yoksa asagidaki varsayilanlar kullanilir.
+// Ayarlar config.php'den okunur (varsa); yoksa asagidaki varsayilanlar kullanilir.
 $GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
 $GEMINI_MODEL   = 'gemini-2.5-flash';
 if (is_file(__DIR__ . '/config.php')) {

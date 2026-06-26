@@ -1,54 +1,55 @@
 # Akilli Dolap & AI Sef
 
+Dolaptaki malzemelere gore yapay zeka ile yemek tarifi oneren cok kullanicili web uygulamasi.
+
 **Canli Demo:** https://akillidolap.infinityfreeapp.com/login.php
 
-Cok kullanicili bir web uygulamasi: her kullanici **kayit olup giris yapar**, kendi dolabini yonetir ve dolabindaki malzemelere gore **yapay zeka (Google Gemini)** ile yemek tarifi alir. "Bu tarifi yaptim" dediginde kullanilan malzemeler dolabindan otomatik dusulur.
+Kullanici kayit olup giris yapar, kendi dolabini yonetir; Google Gemini dolaptaki malzemelere gore tarif onerir. "Bu tarifi yaptim" dendiginde kullanilan malzemeler dolaptan otomatik dusulur ve yapilan tarifler gecmiste saklanir.
 
-## Kullanilan Teknolojiler
+## Ozellikler
+- Kayit / giris / cikis (sifreler `password_hash` ile saklanir)
+- Kullaniciya ozel dolap (PDO prepared statement ile SQL injection korumasi)
+- Yapay zeka tarif onerisi (ogune gore: kahvalti, aksam yemegi, cay saati...)
+- Belirli bir yemek isteme + eksik malzemeleri listeleme
+- "Baska tarif oner" ile farkli oneriler
+- Gecmis tarifler: goruntule, sil, paylas
+- "Bu tarifi yaptim" -> malzeme dusme + aninda guncelleme
+
+## Teknolojiler
 - **Backend:** PHP (Native) + PDO
 - **Veritabani:** MySQL
 - **Kimlik dogrulama:** `password_hash` / `password_verify` + PHP Session
-- **Frontend:** Vanilla JavaScript (ES6+, `fetch`/AJAX)
-- **Arayuz:** Tailwind CSS (CDN)
+- **Frontend:** Vanilla JavaScript (ES6+, fetch/AJAX)
+- **Arayuz:** Tailwind CSS
 - **AI:** Google Gemini API
 
-## Dosyalar
+## Dosya Yapisi
 | Dosya | Gorevi |
 |-------|--------|
-| `database.sql` | `users` + `inventory` tablolarini olusturur |
+| `database.sql` | `users`, `inventory`, `recipes` tablolarini olusturur |
 | `db.php` | PDO baglantisi + oturum (session) baslatma |
 | `auth.php` | Giris kontrol yardimcilari (require_login vb.) |
-| `register.php` | Kayit ol sayfasi (sifre hash'lenir) |
-| `login.php` | Giris yap sayfasi |
+| `register.php` | Kayit sayfasi (sifre hash'lenir) |
+| `login.php` | Giris sayfasi |
 | `logout.php` | Cikis (oturumu kapatir) |
 | `manage_inventory.php` | Malzeme ekle / listele / sil (kullaniciya ozel) |
-| `ai_recipe.php` | Gemini ile tarif uretir (anahtar sunucuda) |
-| `consume.php` | "Yaptim" -> malzemeleri duser |
-| `index.php` | Uc kolonlu ana arayuz (giris gerektirir) |
+| `ai_recipe.php` | Gemini ile tarif uretimi |
+| `consume.php` | "Yaptim" -> malzemeleri duser, tarifi gecmise kaydeder |
+| `recipes.php` | Gecmis tarifleri listele / sil |
+| `index.php` | Uc kolonlu ana arayuz |
+| `config.example.php` | Ornek ayar dosyasi |
 
 ## Cok Kullanicili Yapi
-Her kullanicinin verisi **ayri veritabani degil**, tek veritabaninda `inventory.user_id` ile ayrilir. Bir kullanici yalnizca kendi malzemelerini gorur/degistirir.
+Her kullanicinin verisi ayri veritabani degil, tek veritabaninda `user_id` ile ayrilir. Bir kullanici yalnizca kendi malzeme ve tariflerini gorur/degistirir.
 
-## Yerel Kurulum (XAMPP)
-1. Klasoru XAMPP'in `htdocs` klasorune kopyala (`htdocs/akilli-dolap`).
-2. XAMPP'ta **Apache** ve **MySQL**'i baslat.
-3. `http://localhost/phpmyadmin` -> **SQL** -> `database.sql` icerigini calistir.
-4. Gerekirse `db.php`'deki baglanti bilgilerini duzenle (XAMPP varsayilan: `root`, sifre bos).
-5. `ai_recipe.php` icindeki `YOUR_GEMINI_API_KEY` yerine kendi Gemini anahtarini yaz. *(Anahtarsiz da calisir -> demo tarif doner.)*
-6. Ac: `http://localhost/akilli-dolap/login.php` -> Kayit ol -> kullan.
+## Kurulum (XAMPP)
+1. Projeyi XAMPP'in `htdocs` klasorune koy.
+2. Apache ve MySQL'i baslat.
+3. phpMyAdmin'de `database.sql`'i calistir.
+4. `db.php`'deki veritabani bilgilerini ortamina gore ayarla (XAMPP varsayilan: `root`, sifre bos).
+5. `config.example.php`'yi `config.php` olarak kopyala ve Gemini API anahtarini gir. (Anahtar girilmezse demo tarif doner.)
+6. `login.php`'yi ac, kayit ol ve kullan.
 
-## Canli Yayin (hocanin tiklayacagi link)
-GitHub PHP calistirmaz; canli link icin ucretsiz PHP+MySQL hostinge (or. InfinityFree) yukle. Adimlar `CANLI-YAYIN.txt` dosyasinda.
-
-## Gemini API Anahtari
-- Ucretsiz al: https://aistudio.google.com/apikey
-- Anahtari **yalnizca** sunucudaki `ai_recipe.php`'ye yaz.
-- Anahtari **GitHub'a yukleme.** Kodda `YOUR_GEMINI_API_KEY` olarak kalsin.
-
-## Ozellikler
-- Kayit / giris / cikis (sifreler hash'li)
-- Kullaniciya ozel dolap (PDO prepared statement, SQL injection korumasi)
-- API anahtari yalnizca sunucuda
-- AJAX ile sayfa yenilemeden malzeme ekleme/silme
-- Tarif uretiminde spinner
-- "Bu Tarifi Yaptim!" -> malzeme dusme + aninda guncelleme
+## Yapilandirma
+Gemini API anahtari ucretsiz alinir: https://aistudio.google.com/apikey
+Anahtar `config.php` icine yazilir; bu dosya surum kontrolune dahil edilmez.
