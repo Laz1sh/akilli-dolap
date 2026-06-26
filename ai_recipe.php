@@ -18,8 +18,15 @@ require __DIR__ . '/auth.php';
 require_login_api();
 header('Content-Type: application/json; charset=utf-8');
 
-const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
-const GEMINI_MODEL   = 'gemini-2.0-flash';
+// Ayarlar: config.php VARSA oradan okunur (anahtar orada durur, GitHub'a gitmez,
+// dosyalari tekrar yukleseniz bile silinmez). Yoksa asagidaki varsayilanlar kullanilir.
+$GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
+$GEMINI_MODEL   = 'gemini-2.0-flash';
+if (is_file(__DIR__ . '/config.php')) {
+    $cfg = require __DIR__ . '/config.php';
+    if (!empty($cfg['gemini_api_key'])) { $GEMINI_API_KEY = $cfg['gemini_api_key']; }
+    if (!empty($cfg['gemini_model']))   { $GEMINI_MODEL   = $cfg['gemini_model']; }
+}
 
 // 1) Giris yapan kullanicinin dolabindaki malzemeleri cek
 $stmt = $pdo->prepare('SELECT name, quantity, unit FROM inventory WHERE user_id = :uid ORDER BY name');
@@ -36,8 +43,17 @@ $ingredientList = implode(', ', array_map(
     $items
 ));
 
+// "Baska tarif oner" icin: daha once onerilen tarifleri haric tut
+$body    = json_decode(file_get_contents('php://input'), true);
+$exclude = (isset($body['exclude']) && is_array($body['exclude'])) ? $body['exclude'] : [];
+$excludeNote = '';
+if ($exclude) {
+    $list = implode(', ', array_map(fn($t) => (string) $t, $exclude));
+    $excludeNote = "Daha once sunlari onerdin; BUNLARDAN TAMAMEN FARKLI, baska bir yemek oner (ayni yemegi tekrar onerme): $list";
+}
+
 // 2) Anahtar yoksa DEMO tarif dondur
-if (GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY' || GEMINI_API_KEY === '') {
+if ($GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY' || $GEMINI_API_KEY === '') {
     echo json_encode([
         'success' => true,
         'demo'    => true,
@@ -63,6 +79,7 @@ if (GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY' || GEMINI_API_KEY === '') {
 // 3) Gemini'ye gonderilecek istem (prompt)
 $prompt = <<<PROMPT
 Sen bir Turk ascisisin. Kullanicinin dolabinda su malzemeler var: $ingredientList
+$excludeNote
 
 Gorevin: Bu malzemelere gore pratik bir yemek tarifi oner.
 - Oncelik: mumkunse SADECE dolaptaki malzemelerle (ve tuz/su/yag gibi temel seylerle) yapilabilen bir tarif sec.
@@ -86,7 +103,7 @@ $payload = [
 ];
 
 $url = "https://generativelanguage.googleapis.com/v1beta/models/"
-     . GEMINI_MODEL . ":generateContent?key=" . GEMINI_API_KEY;
+     . $GEMINI_MODEL . ":generateContent?key=" . $GEMINI_API_KEY;
 
 $ch = curl_init($url);
 curl_setopt_array($ch, [

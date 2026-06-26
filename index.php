@@ -156,24 +156,34 @@ async function deleteItem(id) {
     loadInventory();
 }
 
-$('generateBtn').addEventListener('click', async () => {
+// Onerilen tarif basliklari — "Baska Tarif Oner"de bunlari haric tutariz
+let suggestedTitles = [];
+
+async function generateRecipe() {
     $('spinner').classList.remove('hidden');
     $('recipeArea').innerHTML = '';
     try {
-        const res  = await fetch('ai_recipe.php');
+        const res  = await fetch('ai_recipe.php', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ exclude: suggestedTitles }),
+        });
         const data = await res.json();
         if (!data.success) {
             $('recipeArea').innerHTML = `<p class="text-red-500">${data.error}</p>`;
             return;
         }
         currentRecipe = data.recipe;
+        if (data.recipe && data.recipe.title) suggestedTitles.push(data.recipe.title);
         renderRecipe(data.recipe, data.demo);
     } catch (err) {
         $('recipeArea').innerHTML = `<p class="text-red-500">Baglanti hatasi: ${err}</p>`;
     } finally {
         $('spinner').classList.add('hidden');
     }
-});
+}
+
+$('generateBtn').addEventListener('click', generateRecipe);
 
 function renderRecipe(r, demo, readOnly) {
     const ing = r.ingredients.map(i =>
@@ -201,10 +211,15 @@ function renderRecipe(r, demo, readOnly) {
         ${readOnly ? '' : `<button id="madeBtn"
                 class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg py-2 font-medium transition">
             Bu Tarifi Yaptim!
+        </button>
+        <button id="otherBtn"
+                class="w-full mt-2 border border-indigo-500 text-indigo-600 hover:bg-indigo-50 rounded-lg py-2 font-medium transition">
+            Begenmedim, Baska Tarif Oner
         </button>`}`;
 
     if (!readOnly) {
         $('madeBtn').addEventListener('click', consumeRecipe);
+        $('otherBtn').addEventListener('click', generateRecipe);
     }
 }
 
