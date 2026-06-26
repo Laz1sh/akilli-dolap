@@ -147,9 +147,15 @@ async function loadInventory() {
 
 $('addForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const ad = $('name').value.trim();
+    // Basit gecerlilik kontrolu: en az 2 harf, sadece harf/bosluk, en az bir sesli harf
+    if (ad.length < 2 || !/^[a-zçğıİöşü\s]+$/i.test(ad) || !/[aeıioöuü]/i.test(ad)) {
+        alert('Lutfen gecerli bir malzeme adi girin (orn. domates, sut).');
+        return;
+    }
     const body = new URLSearchParams({
         action:   'add',
-        name:     $('name').value,
+        name:     ad,
         quantity: $('quantity').value,
         unit:     $('unit').value || 'adet',
     });
