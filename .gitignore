@@ -11,6 +11,7 @@ node_modules/
 .DS_Store
 Thumbs.db
 *.log
+*.zip
 
 # Editor / arac ayarlari
 .vscode/
