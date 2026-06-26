@@ -232,6 +232,10 @@ function renderRecipe(r, demo, readOnly) {
         ${missingBlock}
         <p class="font-semibold">Yapilisi:</p>
         <ol class="list-decimal list-inside mb-4 space-y-1">${steps}</ol>
+        <button id="shareBtn"
+                class="w-full mb-2 border border-slate-300 text-slate-600 hover:bg-slate-100 rounded-lg py-2 font-medium transition">
+            Paylas
+        </button>
         ${readOnly ? '' : `<button id="madeBtn"
                 class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg py-2 font-medium transition">
             Bu Tarifi Yaptim!
@@ -241,9 +245,35 @@ function renderRecipe(r, demo, readOnly) {
             Begenmedim, Baska Tarif Oner
         </button>`}`;
 
+    $('shareBtn').addEventListener('click', () => shareRecipe(r));
     if (!readOnly) {
         $('madeBtn').addEventListener('click', consumeRecipe);
         $('otherBtn').addEventListener('click', generateRecipe);
+    }
+}
+
+// Tarifi metin olarak paylas (telefonda native menu, bilgisayarda panoya kopyala)
+function shareRecipe(r) {
+    let txt = r.title + '\n';
+    if (r.description) txt += r.description + '\n';
+    txt += '\nMalzemeler:\n' + r.ingredients.map(i => `- ${i.name} ${i.quantity} ${i.unit || ''}`).join('\n');
+    if (r.missing && r.missing.length) {
+        txt += '\n\nEksik (almaniz gerekenler):\n' +
+            r.missing.map(i => `- ${i.name} ${i.quantity || ''} ${i.unit || ''}`).join('\n');
+    }
+    txt += '\n\nYapilisi:\n' + r.steps.map((s, i) => `${i + 1}. ${s}`).join('\n');
+    txt += '\n\n(Akilli Dolap & AI Sef)';
+
+    if (navigator.share) {
+        navigator.share({ title: r.title, text: txt }).catch(() => {});
+    } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(txt)
+            .then(() => alert('Tarif kopyalandi! Istedigin yere yapistirabilirsin.'));
+    } else {
+        const ta = document.createElement('textarea');
+        ta.value = txt; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); ta.remove();
+        alert('Tarif kopyalandi!');
     }
 }
 
