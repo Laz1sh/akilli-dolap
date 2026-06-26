@@ -68,9 +68,21 @@ $username = current_username();
         <!-- KOLON 2: AI Sef -->
         <section class="bg-white rounded-xl shadow p-5">
             <h2 class="text-lg font-semibold mb-4">AI Sef</h2>
-            <p class="text-sm text-slate-500 mb-4">
+            <p class="text-sm text-slate-500 mb-3">
                 Dolabindaki malzemelere gore sana bir tarif onersin.
             </p>
+            <label class="block text-sm text-slate-600 mb-1">Hangi ogun icin?</label>
+            <select id="mealType"
+                    class="w-full border rounded-lg px-3 py-2 text-sm bg-white mb-3 focus:ring-2 focus:ring-indigo-400 outline-none">
+                <option value="farketmez">Farketmez</option>
+                <option value="kahvalti">Kahvalti</option>
+                <option value="gec kahvalti (brunch)">Gec kahvalti (brunch)</option>
+                <option value="ogle yemegi">Ogle yemegi</option>
+                <option value="aksam yemegi">Aksam yemegi</option>
+                <option value="cay saati ikrami (misafire)">Cay saati ikrami (misafire)</option>
+                <option value="atistirmalik">Atistirmalik</option>
+                <option value="tatli">Tatli</option>
+            </select>
             <button id="generateBtn"
                     class="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg py-3 font-medium transition flex items-center justify-center gap-2">
                 Tarif Oner
@@ -166,7 +178,7 @@ async function generateRecipe() {
         const res  = await fetch('ai_recipe.php', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ exclude: suggestedTitles }),
+            body:    JSON.stringify({ exclude: suggestedTitles, meal: $('mealType').value }),
         });
         const data = await res.json();
         if (!data.success) {

@@ -21,7 +21,7 @@ header('Content-Type: application/json; charset=utf-8');
 // Ayarlar: config.php VARSA oradan okunur (anahtar orada durur, GitHub'a gitmez,
 // dosyalari tekrar yukleseniz bile silinmez). Yoksa asagidaki varsayilanlar kullanilir.
 $GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
-$GEMINI_MODEL   = 'gemini-2.0-flash';
+$GEMINI_MODEL   = 'gemini-2.5-flash';
 if (is_file(__DIR__ . '/config.php')) {
     $cfg = require __DIR__ . '/config.php';
     if (!empty($cfg['gemini_api_key'])) { $GEMINI_API_KEY = $cfg['gemini_api_key']; }
@@ -52,6 +52,12 @@ if ($exclude) {
     $excludeNote = "Daha once sunlari onerdin; BUNLARDAN TAMAMEN FARKLI, baska bir yemek oner (ayni yemegi tekrar onerme): $list";
 }
 
+// Ogun turu (kahvalti, aksam yemegi, cay saati ikrami...)
+$meal = isset($body['meal']) ? trim((string) $body['meal']) : '';
+$mealNote = ($meal !== '' && $meal !== 'farketmez')
+    ? "Kullanici su OGUN icin tarif istiyor: $meal. Tarifi bu ogune uygun sec (orn. kahvalti icin kahvaltilik, cay saati icin ikramlik/hamur isi/tatli gibi)."
+    : '';
+
 // 2) Anahtar yoksa DEMO tarif dondur
 if ($GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY' || $GEMINI_API_KEY === '') {
     echo json_encode([
@@ -80,6 +86,7 @@ if ($GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY' || $GEMINI_API_KEY === '') {
 $prompt = <<<PROMPT
 Sen bir Turk ascisisin. Kullanicinin dolabinda su malzemeler var: $ingredientList
 $excludeNote
+$mealNote
 
 Gorevin: Bu malzemelere gore pratik bir yemek tarifi oner.
 - Oncelik: mumkunse SADECE dolaptaki malzemelerle (ve tuz/su/yag gibi temel seylerle) yapilabilen bir tarif sec.
