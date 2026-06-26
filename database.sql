@@ -27,3 +27,13 @@ CREATE TABLE IF NOT EXISTS inventory (
     created_at  TIMESTAMP      DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- Gecmis tarifler — her kullanicinin "yaptim" dedigi tarifler burada birikir
+CREATE TABLE IF NOT EXISTS recipes (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    user_id     INT            NOT NULL,
+    title       VARCHAR(200)   NOT NULL,
+    data        TEXT           NOT NULL,
+    created_at  TIMESTAMP      DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

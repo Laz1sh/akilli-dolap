@@ -13,7 +13,9 @@ header('Content-Type: application/json; charset=utf-8');
 
 $uid   = current_user_id();
 $input = json_decode(file_get_contents('php://input'), true);
-$ingredients = $input['ingredients'] ?? [];
+// Yeni: tum tarif gelir { recipe: {...} }. Eski uyumluluk: { ingredients: [...] }
+$recipe      = (isset($input['recipe']) && is_array($input['recipe'])) ? $input['recipe'] : null;
+$ingredients = $recipe['ingredients'] ?? ($input['ingredients'] ?? []);
 
 if (!is_array($ingredients) || count($ingredients) === 0) {
     http_response_code(400);
@@ -39,6 +41,19 @@ try {
     }
 
     $cleanup->execute([':uid' => $uid]);
+
+    // Yapilan tarifi gecmise kaydet
+    if (is_array($recipe) && !empty($recipe['title'])) {
+        $save = $pdo->prepare(
+            'INSERT INTO recipes (user_id, title, data) VALUES (:uid, :title, :data)'
+        );
+        $save->execute([
+            ':uid'   => $uid,
+            ':title' => mb_substr((string) $recipe['title'], 0, 200),
+            ':data'  => json_encode($recipe, JSON_UNESCAPED_UNICODE),
+        ]);
+    }
+
     $pdo->commit();
 
     // Guncel listeyi geri dondur ki arayuz yenilensin

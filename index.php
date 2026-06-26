@@ -94,6 +94,14 @@ $username = current_username();
         </section>
     </main>
 
+    <!-- Gecmis tarifler (tam genislik) -->
+    <section class="max-w-6xl mx-auto px-4 pb-10">
+        <div class="bg-white rounded-xl shadow p-5">
+            <h2 class="text-lg font-semibold mb-4">Gecmis Tarifler</h2>
+            <ul id="historyList" class="space-y-2 text-sm"></ul>
+        </div>
+    </section>
+
 <script>
 const $ = (id) => document.getElementById(id);
 let currentRecipe = null;
@@ -167,7 +175,7 @@ $('generateBtn').addEventListener('click', async () => {
     }
 });
 
-function renderRecipe(r, demo) {
+function renderRecipe(r, demo, readOnly) {
     const ing = r.ingredients.map(i =>
         `<li>${i.name} — ${i.quantity} ${i.unit || ''}</li>`).join('');
     const steps = r.steps.map(s => `<li>${s}</li>`).join('');
@@ -190,12 +198,14 @@ function renderRecipe(r, demo) {
         ${missingBlock}
         <p class="font-semibold">Yapilisi:</p>
         <ol class="list-decimal list-inside mb-4 space-y-1">${steps}</ol>
-        <button id="madeBtn"
+        ${readOnly ? '' : `<button id="madeBtn"
                 class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg py-2 font-medium transition">
             Bu Tarifi Yaptim!
-        </button>`;
+        </button>`}`;
 
-    $('madeBtn').addEventListener('click', consumeRecipe);
+    if (!readOnly) {
+        $('madeBtn').addEventListener('click', consumeRecipe);
+    }
 }
 
 async function consumeRecipe() {
@@ -203,20 +213,49 @@ async function consumeRecipe() {
     const res = await fetch('consume.php', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ ingredients: currentRecipe.ingredients }),
+        body:    JSON.stringify({ recipe: currentRecipe }),
     });
     const data = await res.json();
     if (data.success) {
         $('recipeArea').innerHTML =
-            '<p class="text-emerald-600 font-medium">Afiyet olsun! Malzemeler dolaptan dusuldu.</p>';
+            '<p class="text-emerald-600 font-medium">Afiyet olsun! Malzemeler dolaptan dusuldu. Tarif gecmise eklendi.</p>';
         currentRecipe = null;
         loadInventory();
+        loadHistory();
     } else {
         alert(data.error || 'Islem basarisiz.');
     }
 }
 
+// Gecmis tarifleri yukle ve listele
+async function loadHistory() {
+    const res  = await fetch('recipes.php');
+    const data = await res.json();
+    const list = $('historyList');
+    list.innerHTML = '';
+    if (!data.success || data.recipes.length === 0) {
+        list.innerHTML = '<li class="text-slate-400">Henuz kaydedilmis tarif yok. Bir tarif yapinca burada birikir.</li>';
+        return;
+    }
+    data.recipes.forEach(row => {
+        const li = document.createElement('li');
+        li.className = 'flex justify-between items-center border rounded-lg px-3 py-2';
+        const date = (row.created_at || '').replace('T', ' ').slice(0, 16);
+        li.innerHTML =
+            `<span><strong>${row.title}</strong> <span class="text-slate-400 text-xs">${date}</span></span>
+             <button class="view text-indigo-600 hover:text-indigo-800 text-xs">Goster</button>`;
+        li.querySelector('.view').addEventListener('click', () => {
+            try {
+                renderRecipe(JSON.parse(row.data), false, true);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (e) { /* bozuk kayit, atla */ }
+        });
+        list.appendChild(li);
+    });
+}
+
 loadInventory();
+loadHistory();
 </script>
 </body>
 </html>
